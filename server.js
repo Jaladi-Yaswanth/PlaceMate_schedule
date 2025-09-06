@@ -19,13 +19,13 @@ function myFunction() {
     messages.forEach(msg=>{
       const subject=msg.getSubject();
 
-      if(!subject.includes("Test")){
+      if(!subject.toLowerCase().includes("test")){
          Logger.log("No test ");
          return;}
 
       const attchments=msg.getAttachments();
       attchments.forEach(attchment=>{
-        if(attchment.getContentType().includes("sheet")|| attchment.getNmae().match(/\.(xlsx|xls)$/)){
+        if(attchment.getContentType().includes("sheet")|| attchment.getName().match(/\.(xlsx|xls)$/)){
           const blob=attchment.copyBlob();
           const file=DriveApp.createFile(blob);
           const sheetfile=SpreadsheetApp.openById(file.getId());
@@ -37,7 +37,7 @@ function myFunction() {
             data.forEach(row=>{
               if(row.join(' ').includes(my_name) || row.join(' ').includes(my_reg_number)){
                   found=true;
-                  break;
+                  
               }
             })
           });
@@ -48,9 +48,10 @@ function myFunction() {
               venue="Own Location";
             }
 
-            else venue=extractvenue(attchments);
+            else venue=extractvenue(attchments)||"TBD";
           
-
+            const start=extractDateTimeFromText(msg.getSubject());
+      const end=new Date(start.getTime()+60*60*1000);
               CalendarApp.createEvent(
             msg.getSubject(),
             start,
@@ -69,6 +70,10 @@ function myFunction() {
         }
         
       });
+      let venue="";
+            if(msg.getSubject().toLowerCase().includes("own location")){
+            
+            venue="Own location";}
 
       const start=extractDateTimeFromText(msg.getSubject());
       const end=new Date(start.getTime()+60*60*1000);
@@ -77,7 +82,7 @@ function myFunction() {
             start,
             end,
             {
-              location:"My place",
+              location:`${venue}`,
               description:msg.getThread().getPermalink()+
               "\nsee this"
 
@@ -115,14 +120,14 @@ function extractDateTimeFromText(text){
     return parsedDate;
   } 
   } catch(error){
-    Logger.log("Error parsing Date/Time"+error.tiString());
+    Logger.log("Error parsing Date/Time"+error.toString());
 }}
 
 
 function extractDate(text){
   
         try{
-          monthMap = {
+         let  monthMap = {
             'jan': 'January', 'feb': 'February', 'mar': 'March', 'apr': 'April',
             'may': 'May', 'jun': 'June', 'jul': 'July', 'aug': 'August',
             'sep': 'September', 'oct': 'October', 'nov': 'November', 'dec': 'December'
@@ -157,7 +162,7 @@ function extractDate(text){
           const short=match[2];
           year=match[3];
 
-          const fullmonth=monthMap[short.tolowerCase()];
+          const fullmonth=monthMap[short.toLowerCase()];
           if(!fullmonth) continue;
           formattedDate=`${fullmonth} ${day} ${year}`;
         }
@@ -218,10 +223,10 @@ function extractTime(text){
 function extractvenue(attchments){
   try{
     Logger.log("Processing venue list");
-    const extractedVenue;
+    let extractedVenue=null;
     attchments.forEach(attchement=>{
-      const fileName=attchement.getNmae();
-      if(fileName.tolowerCase().includes('venue')){
+      const fileName=attchment.getName();
+      if(fileName.toLowerCase().includes('venue')){
         Logger.log('Found venues list');
         extractedVenue=extrcatfromlist(attchement,name,re);
         if(extractedVenue){
@@ -233,11 +238,11 @@ function extractvenue(attchments){
     return null;
   }catch(error){
     Logger.log("Error in venue");
-    retun;
+    return;
   }
 }
 
 
 function extrcatfromlist(attchement,name,reg){
-
+return null;
 }
