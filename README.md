@@ -1,4 +1,4 @@
-# 📧 Automated Placement Mail → Google Calendar Integration
+#  Automated Placement Mail → Google Calendar Integration
 
 ## 📌 Problem Statement
 University placement teams often send **emails with attachments (Excel/Sheets)** listing candidates, venues, and schedules for tests or talks.  
