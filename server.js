@@ -1,6 +1,6 @@
 
-const my_name="Jaladi Yaswanth";
-const my_reg_number="22BCE9789";
+const my_name=  "Your_Name;
+const my_reg_number="Your_Registration_Number";
 function myFunction() {
   const now=new Date();
   Logger.log(now);
