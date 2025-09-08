@@ -8,7 +8,8 @@ function myFunction() {
   const thirtyMinutesAgo=new Date(now.getTime()-120*60*1000);
   Logger.log(thirtyMinutesAgo);
 
-  const query="(from:students.cdc.2026@vitap.ac.in OR from:jaladiyaswanth2005@gmail.com) is:unread";
+
+  const query="(from:students.cdc2026@vitap.ac.in  from:placement@vitap.ac.in OR to:students.cdc2026@vitap.ac.in) is:unread";
 
 
   const threads=GmailApp.search(query);
