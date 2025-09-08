@@ -9,7 +9,7 @@ Manually, students must:
 - Note the venue/date  
 - Create calendar events manually  
 
-⚡ This is time-consuming, error-prone, and inefficient.
+⚡ This is time-consuming.
 
 **Solution:** An automated Gmail + Google Apps Script system that:  
 - Reads unread mails from placement office mailing lists  
@@ -20,8 +20,7 @@ Manually, students must:
 ---
 
 ## 🛠️ Tech Stack
-- **Google Apps Script** – automation engine  
-- **GmailApp API** – read and filter emails  
+- **Google Apps Script** – automation engine   
 - **Drive API** – handle Excel/Sheets conversion  
 - **SpreadsheetApp API** – parse attachments  
 - **CalendarApp API** – auto-create calendar events  
@@ -34,6 +33,6 @@ Manually, students must:
 3. Enable **Google Drive API** in:  
    - Apps Script → Services → Add Drive API  
 4. Replace placeholders:  
-   ```javascript
+   
    const my_name = "Your_Name";
    const my_reg_number = "Your_Registration_Number";
