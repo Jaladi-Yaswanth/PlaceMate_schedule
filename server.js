@@ -1,15 +1,16 @@
+const my_name="Your_Name";
+const my_reg_number="Your_Registration_Number"; //22bce****
 
-const my_name=  "Your_Name;
-const my_reg_number="Your_Registration_Number";
+
 function myFunction() {
   const now=new Date();
   Logger.log(now);
-  Logger.log(now.getTime());
-  const thirtyMinutesAgo=new Date(now.getTime()-120*60*1000);
+  Logger.log("Checking in last 30 minutes");
+  const thirtyMinutesAgo=new Date(now.getTime()-30*60*1000);
   Logger.log(thirtyMinutesAgo);
 
-
-  const query="(from:students.cdc2026@vitap.ac.in  from:placement@vitap.ac.in OR to:students.cdc2026@vitap.ac.in) is:unread";
+ 
+   const query="(from:students.cdc2026@vitap.ac.in  OR from:placement@vitap.ac.in OR to:students.cdc2026@vitap.ac.in) is:unread";
 
 
   const threads=GmailApp.search(query);
@@ -18,39 +19,27 @@ function myFunction() {
   if(recentThreads.length===0) return;
   Logger.log(recentThreads);
 
-  recentThreads.forEach(thread=>{
+const createdEvents = new Set();
+
+  for(let thread of recentThreads) {
+   
     const messages=thread.getMessages();
-    messages.forEach(msg=>{
+    for(let msg of messages){
+   
       const subject=msg.getSubject();
 
-      if(!subject.toLowerCase().includes("talk") && !subject.toLowerCase().includes("test")){
+      if(!subject.toLowerCase().includes("talk") &&
+         !subject.toLowerCase().includes("test") &&
+         !subject.toLocaleUpperCase().includes("process") &&
+         !subject.toLowerCase().includes("online") ){
          Logger.log("No test ");
-         return;}
+         continue;}
 
       const attachments=msg.getAttachments();
-      attachments.forEach(attachment=>{
+      for(let attachment of attachments){
         if(attachment.getContentType().includes("sheet")|| attachment.getName().match(/\.(xlsx|xls)$/)){
           const blob=attachment.copyBlob();
-          // blob.setContentType('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-          // const file=DriveApp.createFile(blob);
-          // const sheetfile=SpreadsheetApp.openById(file.getId());
-          
-
-        //   const fileMetadata = {
-        //     'name': attachment.getName().replace(/\.(xlsx|xls)$/, ''),
-        //     'mimeType': 'application/vnd.google-apps.spreadsheet'
-        // };
-        
-        // const media = {
-        //     mimeType: attachment.getContentType(),
-        //     body: blob.getBytes()
-        // };
-        
-        // const file = Drive.Files.create(fileMetadata, media, {
-        //     uploadType: 'multipart'
-        // });
-        
-        // const sheetfile = SpreadsheetApp.openById(file.id);
+         
 
       const fileMetadata = {
             'name': attachment.getName().replace(/\.(xlsx|xls)$/, ''),
@@ -58,39 +47,37 @@ function myFunction() {
         };
         
         // Use the blob directly, not getBytes()
-        const file = Drive.Files.insert(fileMetadata, blob,{convert: true});
+        const file = Drive.Files.create(fileMetadata, blob);
+           Logger.log("Adding candidates list into drive")
         
         const sheetfile = SpreadsheetApp.openById(file.id);
 
           let found=false;
-          // sheetfile.getSheets().forEach(sheet=>{
-          //   const data=sheet.getDataRange().getValues();
+      
 
-          //   data.forEach(row=>{
-          //     if(row.join(' ').includes(my_name) || row.join(' ').includes(my_reg_number)){
-          //         found=true;
-                  
-          //     }
-          //   })
-          // });
-
-          for (let sheet of sheetfile.getSheets()) {
-  const data = sheet.getDataRange().getValues();
-  for (let row of data) {
-    if (row.join(' ').includes(my_name) || row.join(' ').includes(my_reg_number)) {
-      found = true;
-      break; // exit row loop
-    }
-  }
-  if (found) break; // exit sheet loop
-}
+                  for (let sheet of sheetfile.getSheets()) {
+          const data = sheet.getDataRange().getValues();
+          for (let row of data) {
+            if (row.join(' ').includes(my_name) || row.join(' ').includes(my_reg_number)) {
+              found = true;
+              break; // exit row loop
+            }
+          }
+          if (found) break; // exit sheet loop
+        }
 
 
-
-
+           Logger.log("Deleting candidates list from drive")
           DriveApp.getFileById(file.id).setTrashed(true);
 
           if(found){
+
+            const basicEventKey = `${subject}`;
+  
+  if (createdEvents.has(basicEventKey)) {
+    Logger.log("Event already created, skipping duplicate - no extraction needed");
+    continue;
+  }
             let venue="";
             if(msg.getSubject().toLowerCase().includes("own location")){
               venue="Own Location";
@@ -108,62 +95,66 @@ function myFunction() {
               tomorrow.setHours(10, 0, 0, 0); // 10:00 AM
               start = tomorrow;
             }
+
+            //Default 1hr
             const end=new Date(start.getTime()+60*60*1000);
+
+
+            const eventKey = `${msg.getSubject()}-${start.getTime()}`;
+            if (createdEvents.has(eventKey)) {
+                Logger.log("Event already created, skipping duplicate");
+                continue;
+              }
 
             //Creating Calendar Event
              try{ CalendarApp.createEvent(
             msg.getSubject(),
             start,
             end,
-            {
-              location:`${venue}`,
-              description:msg.getThread().getPermalink()+
-              "\nsee this"
 
-            }
+            {
+  location: `${venue}`,
+  description: `
+📍 Venue: ${venue}
+⏱️ Duration: ${Math.round((end.getTime() - start.getTime()) / (1000 * 60))} minutes
+
+📧 Original Email: ${msg.getThread().getPermalink()}
+
+💡 Remember: Bring ID card & arrive 15 mins early!
+
+
+  `,
+  
+  // Just essential reminders
+  reminders: {
+    useDefault: false,
+    overrides: [
+      {method: 'popup', minutes: 60},   // 1 hour before
+      {method: 'popup', minutes: 15}    // 15 minutes before  
+    ]
+  }
+}
             
             
           );
+          createdEvents.add(eventKey);
           
               if(venue==="TBD") Logger.log("Created calendar event with TBD");
             else Logger.log("Created calendar event with location");
           }catch(error){
-              Logger.log("Error creating calendar event " +error.toString());
+              Logger.log("Error creating calendar event " + error.toString());
           }
           }
         }
-        
-      });
+      }
+    }
+  }
+  // Clear set for memory efficiency
+  createdEvents.clear();
+  Logger.log("Cleared event tracking set for memory efficiency");
 
-      /*
-      let venue="";
-            if(msg.getSubject().toLowerCase().includes("own location")){
-            
-            venue="Own location";}
+  }
 
-      const start=extractDateTimeFromText(msg.getSubject());
-      const end=new Date(start.getTime()+60*60*1000);
-      CalendarApp.createEvent(
-            msg.getSubject(),
-            start,
-            end,
-            {
-              location:`${venue}`,
-              description:msg.getThread().getPermalink()+
-              "\nsee this"
-
-            }
-            
-            
-          );
-          Logger.log("Created from else");
-      */
-        
-
-
-    })
-  })
-}
 
 
 function create_calender(){}
@@ -322,60 +313,6 @@ function extractvenue(attachments){
 }
 
 
-// function extractfromlist(attachment,name,reg){
-//     const blob=attachment.copyBlob();
-//           const file=DriveApp.createFile(blob);
-//           const sheetfile=SpreadsheetApp.openById(file.getId());
-//     const data=sheetfile.getDataRange().getValues();
-//     const venueIndex=data[0].findIndex(h=>h.toString().toLowerCase().includes("venue"));
-//     if(venueIndex==-1) return null;
-
-//     for(let i=1;i<data.length;i++){
-//       const row=data[i].join(' ').toLowerCase();
-//       if(row.includes(name) || row.includes(reg)){
-//         DriveApp.getFileById(file.getId()).setTrashed(true);
-//         return data[i][venueIndex];
-//       }
-//     }
-//         DriveApp.getFileById(file.getId()).setTrashed(true);
-
-//     return null;
-// }
-
-
-// function extractfromlist(attachment, name, reg){
-//   let tempFile = null;
-//   try {
-//     const blob = attachment.copyBlob();
-//     tempFile = DriveApp.createFile(blob);
-//     const sheetfile = SpreadsheetApp.openById(tempFile.getId());
-//     const data = sheetfile.getDataRange().getValues();
-    
-//     const venueIndex = data[0].findIndex(h => h.toString().toLowerCase().includes("venue"));
-//     if(venueIndex === -1) return null;
-
-//     for(let i = 1; i < data.length; i++){
-//       const row = data[i].join(' ').toLowerCase();
-//       if(row.includes(name.toLowerCase()) || row.includes(reg.toLowerCase())){
-//         return data[i][venueIndex];
-//       }
-//     }
-//     return null;
-    
-//   } catch(error) {
-//     Logger.log("Error in extractfromlist: " + error.toString());
-//     return null;
-//   } finally {
-//     // Clean up temporary file
-//     if(tempFile) {
-//       try {
-//         DriveApp.getFileById(tempFile.getId()).setTrashed(true);
-//       } catch(e) {
-//         Logger.log("Error deleting temp file: " + e.toString());
-//       }
-//     }
-//   }
-// }
 
 
 
@@ -413,6 +350,8 @@ function extractfromlist(attachment, name, reg) {
     // Clean up the converted file
     if (tempFile) {
       try {
+        Logger.log("deleting venues list from drive");
+
         DriveApp.getFileById(tempFile.id).setTrashed(true);
       } catch (e) {
         Logger.log("Error deleting temp file: " + e.toString());
