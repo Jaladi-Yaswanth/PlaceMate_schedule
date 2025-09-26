@@ -1,12 +1,12 @@
 const my_name="Your_Name";
-const my_reg_number="Your_Registration_NUmber"; //22bce****
+const my_reg_number="Your_Registration_Number"; //22bce****
 
 
 function myFunction() {
   const now=new Date();
   Logger.log(now);
   Logger.log("Checking in last 30 minutes");
-  const thirtyMinutesAgo=new Date(now.getTime()-120*60*1000);
+  const thirtyMinutesAgo=new Date(now.getTime()-30*60*1000);
   Logger.log(thirtyMinutesAgo);
 
  
