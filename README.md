@@ -58,7 +58,7 @@ Follow these steps to set up and run the Placement Automation script:
 5. **Set Up a Trigger to Run Automatically**  
    - Click the **Triggers (clock icon)** in Apps Script → **Add Trigger**.  
    - Select the function `myFunction` to run.  
-   - Choose **Time-driven** → **Minutes timer** → e.g., every 10 or 30 minutes.  
+   - Choose **Time-driven** → **Minutes timer** → e.g.,  30 minutes(since it will check in last 30 min window).  
    - This ensures the script regularly checks your Gmail for new placement or test emails.  
 
 6. **Authorize the Script**  
