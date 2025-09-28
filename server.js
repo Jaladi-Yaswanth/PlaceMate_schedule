@@ -33,12 +33,17 @@ const processedMessages = new Set();
    
       const subject=msg.getSubject();
 
-      if(!(subject.toLowerCase().includes("talk") ||
-         subject.toLowerCase().includes("test") ||
-         subject.toLowerCase().includes("process") ||
-         subject.toLowerCase().includes("online")) ){
-         Logger.log("No test ");
-         continue;}
+      // if(!(subject.toLowerCase().includes("talk") ||
+      //    subject.toLowerCase().includes("test") ||
+      //    subject.toLowerCase().includes("process") ||
+      //    subject.toLowerCase().includes("online")) ){
+      //    Logger.log("No test ");
+      //    continue;}
+      const keywords = ["talk", "test", "process", "online", "assessment", "exam"];
+        if (!keywords.some(k => subject.toLowerCase().includes(k))) {
+            Logger.log("No test");
+            continue;
+        }
 
       const attachments=msg.getAttachments();
       for(let attachment of attachments){
