@@ -77,4 +77,7 @@ Follow these steps to set up and run the Placement Automation script:
    - Make sure the subject contains keywords like `talk` or `test`.  
    - Run the script manually once to confirm it correctly creates a calendar event.  
    - Check the logs in Apps Script (`View → Logs`) for debug information.
+  
+✅ With these triggers and permissions, the script executes automatically every 30 minutes without any manual input.  
+🔎 You can also view and monitor all runs in **Executions** inside the Apps Script dashboard.
 
