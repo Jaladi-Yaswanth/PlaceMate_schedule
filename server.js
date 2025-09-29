@@ -10,7 +10,7 @@ function myFunction() {
   Logger.log(thirtyMinutesAgo);
 
  
-   const query="(from:students.cdc2026@vitap.ac.in  OR from:placement@vitap.ac.in OR to:students.cdc2026@vitap.ac.in) is:unread";
+   const query="(from:"placement_cell_email"  OR from:"placement_cell_email" OR to:"placement_cell_email") is:unread"; // from: abc@gmail.com
 
 
   const threads=GmailApp.search(query);
